@@ -4,13 +4,13 @@ const { useEffect } = React
 export function AppFooter () {
 
     useEffect(() => {
-        // component did mount when dependancy array is empty
+        // component did mount when dependency array is empty
     }, [])
 
     return (
         <footer>
             <p>
-                coffeerights to all
+                coffeeRights to all
             </p>
         </footer>
     )

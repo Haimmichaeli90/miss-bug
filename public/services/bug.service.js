@@ -33,9 +33,6 @@ function save(bug) {
     }
 }
 
-
-
-
 function _createBugs() {
     let bugs = utilService.loadFromStorage(STORAGE_KEY)
     if (!bugs || !bugs.length) {
@@ -43,27 +40,28 @@ function _createBugs() {
             {
                 title: "Infinite Loop Detected",
                 severity: 4,
+                description: "The system gets stuck in an infinite loop.",
                 _id: "1NF1N1T3"
             },
             {
                 title: "Keyboard Not Found",
                 severity: 3,
+                description: "Keyboard is not detected by the system.",
                 _id: "K3YB0RD"
             },
             {
                 title: "404 Coffee Not Found",
                 severity: 2,
+                description: "The coffee machine is out of coffee!",
                 _id: "C0FF33"
             },
             {
                 title: "Unexpected Response",
                 severity: 1,
+                description: "Received an unexpected response from server.",
                 _id: "G0053"
             }
         ]
         utilService.saveToStorage(STORAGE_KEY, bugs)
     }
-
-
-
 }

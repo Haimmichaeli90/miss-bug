@@ -5,7 +5,7 @@ import { UserMsg } from './UserMsg.jsx'
 
 export function AppHeader() {
     useEffect(() => {
-        // component did mount when dependancy array is empty
+        // component did mount when dependency array is empty
     }, [])
 
     return (
