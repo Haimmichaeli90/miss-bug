@@ -1,67 +1,42 @@
-
-import { storageService } from './async-storage.service.js'
-import { utilService } from './util.service.js'
-
-const STORAGE_KEY = 'bugDB'
-
-_createBugs()
-
 export const bugService = {
     query,
-    getById,
     save,
     remove,
+    getById,
+    getDefaultFilter,
 }
-
-
-function query() {
-    return storageService.query(STORAGE_KEY)
-}
-function getById(bugId) {
-    return storageService.get(STORAGE_KEY, bugId)
-}
-
-function remove(bugId) {
-    return storageService.remove(STORAGE_KEY, bugId)
-}
-
-function save(bug) {
-    if (bug._id) {
-        return storageService.put(STORAGE_KEY, bug)
-    } else {
-        return storageService.post(STORAGE_KEY, bug)
-    }
-}
-
-function _createBugs() {
-    let bugs = utilService.loadFromStorage(STORAGE_KEY)
-    if (!bugs || !bugs.length) {
-        bugs = [
-            {
-                title: "Infinite Loop Detected",
-                severity: 4,
-                description: "The system gets stuck in an infinite loop.",
-                _id: "1NF1N1T3"
-            },
-            {
-                title: "Keyboard Not Found",
-                severity: 3,
-                description: "Keyboard is not detected by the system.",
-                _id: "K3YB0RD"
-            },
-            {
-                title: "404 Coffee Not Found",
-                severity: 2,
-                description: "The coffee machine is out of coffee!",
-                _id: "C0FF33"
-            },
-            {
-                title: "Unexpected Response",
-                severity: 1,
-                description: "Received an unexpected response from server.",
-                _id: "G0053"
-            }
-        ]
-        utilService.saveToStorage(STORAGE_KEY, bugs)
-    }
-}
+  
+  const BASE_URL = '/api/bug/'
+  
+  function query(filterBy = {}) {
+  
+    return axios
+      .get(BASE_URL, { params: { ...filterBy } })
+      .then((res) => res.data)
+  
+  }
+  
+  function getById(bugId) {
+    return axios.get(BASE_URL + bugId).then((res) => res.data)
+  }
+  
+  function remove(bugId) {
+    return axios.get(BASE_URL + bugId + '/remove').then((res) => res.data)
+  }
+  
+  function save(bug) {
+    const url = BASE_URL + 'save'
+    let queryParams = `?title=${bug.title}&severity=${bug.severity}&description=${bug.description}`
+    if (bug._id) queryParams += `&_id=${bug._id}`
+    return axios
+      .get(url + queryParams)
+      .then((res) => res.data)
+      .catch((err) => {
+        console.log('err:', err)
+      })
+  }
+  
+  function getDefaultFilter() {
+    return { txt: '', minSeverity: 0 }
+  }
+  
