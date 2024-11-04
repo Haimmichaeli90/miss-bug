@@ -16,8 +16,9 @@
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "express": "^4.21.1",
-    "nodemon": "^3.1.7"
+    "fs": "^0.0.1-security",
+    "nodemon": "^3.1.7",
+    "pdfkit-table": "^0.1.99"
   },
-  "devDependencies": {},
   "description": ""
 }

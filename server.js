@@ -2,7 +2,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import { bugService } from './services/bug.service.js'
 import { loggerService } from './services/logger.service.js'
-
+import { pdfService } from './services/pdf.service.js'
 
 const app = express()
 
@@ -10,14 +10,6 @@ app.use(express.static('public'))
 app.use(cookieParser())
 
 app.get('/api/bug', (req, res) => {
-    // const views = req.cookies.views ? parseInt(req.cookies.views) : 0
-
-    // if (views >= 3) {
-    //     return res.status(429).send('You have reached the maximum number of views for now')
-    // }
-
-    // // עדכון ספירת העוגייה
-    // res.cookie('views', views + 1, { maxAge: 60 * 60 * 1000 }) // 1 שעה
     bugService.query()
         .then(bug => res.send(bug))
         .catch(err => {
@@ -77,6 +69,32 @@ app.get('/api/bug/:bugId/remove', (req, res) => {
         loggerService.error('Cannot remove car',err)
         res.status(500).send('Cannot remove car')
     })
+})
+
+app.get('/pdf', (req, res) => {
+    const path = './pdfs/'
+    console.log('in pdf')
+    
+  
+    bugService.query().then(bugs => {
+      bugs.sort((a, b) => b.createdAt - a.createdAt)
+      const rows = bugs.map(({ title, description, severity }) => [title, description, severity])
+      const headers = ['Title', 'Description', 'Severity']
+  
+      const fileName = 'bugs'
+      pdfService.createPdf({ headers, rows, title: 'Bugs report', fileName }).then(() => {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.sendFile(`${process.cwd()}/pdfs/${fileName}.pdf`);
+        
+     }).catch((err)=>{
+  
+        console.error(err);
+        loggerService.error('Cannot download Pdf',err)
+        res.send('We have a problem, try agin soon')
+    })
+ })
+  
+
 })
 
 app.get('/api/logs', (req, res) => {
