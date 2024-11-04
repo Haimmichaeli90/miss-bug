@@ -9,15 +9,22 @@ const app = express()
 app.use(express.static('public'))
 app.use(cookieParser())
 
-app.get('/api/bug'
-    , (req, res) => {
-        bugService.query()
+app.get('/api/bug', (req, res) => {
+    // const views = req.cookies.views ? parseInt(req.cookies.views) : 0
+
+    // if (views >= 3) {
+    //     return res.status(429).send('You have reached the maximum number of views for now')
+    // }
+
+    // // עדכון ספירת העוגייה
+    // res.cookie('views', views + 1, { maxAge: 60 * 60 * 1000 }) // 1 שעה
+    bugService.query()
         .then(bug => res.send(bug))
         .catch(err => {
-            loggerService.error('Cannot get bugs',err)
-            res.status(500)('Cannot get bugs')
+            loggerService.error('Cannot get bugs', err)
+            res.status(500).send('Cannot get bugs')
         })
-    })
+})
 
 
 app.get('/api/bug/save', (req, res) => {
@@ -39,14 +46,28 @@ app.get('/api/bug/save', (req, res) => {
 
 
 app.get('/api/bug/:bugId', (req, res) => {
-    const {bugId} = req.params
+    const { bugId } = req.params
+    let visitedBugs = req.cookies.visitedBugs ? JSON.parse(req.cookies.visitedBugs) : []
+
+    if (!visitedBugs.includes(bugId)) {
+        visitedBugs.push(bugId)
+    }
+
+    if (visitedBugs.length > 3) {
+        return res.status(401).send('Wait for a bit')
+    }
+    console.log('User visited the following bugs:', visitedBugs)
+
+    res.cookie('visitedBugs', JSON.stringify(visitedBugs), { maxAge: 7 * 1000, httpOnly: true })
+
     bugService.getById(bugId)
-    .then(bug => res.send(bug))
-    .catch(err => {
-        loggerService.error('Cannot get bug',err)
-        res.status(500).send('Cannot get bug')
-    })
+        .then(bug => res.send(bug))
+        .catch(err => {
+            loggerService.error('Cannot get bug', err)
+            res.status(500).send('Cannot get bug')
+        })
 })
+
 
 app.get('/api/bug/:bugId/remove', (req, res) => {
     const {bugId} = req.params
