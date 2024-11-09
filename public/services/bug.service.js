@@ -1,42 +1,29 @@
 export const bugService = {
-    query,
-    save,
-    remove,
-    getById,
-    getDefaultFilter,
+  query,
+  save,
+  remove,
+  getById,
+  getDefaultFilter,
 }
-  
-  const BASE_URL = '/api/bug/'
-  
-  function query(filterBy = {}) {
-  
-    return axios
-      .get(BASE_URL, { params: { ...filterBy } })
-      .then((res) => res.data)
-  
+
+const BASE_URL = '/api/bug/'
+
+function query(filterBy = { txt: '' }) {
+  return axios.get(BASE_URL, { params: filterBy }).then(res => res.data)
+}
+function getById(carId) {
+  return axios.get(BASE_URL + carId).then(res => res.data)
+}
+function remove(carId) {
+  return axios.delete(BASE_URL + carId)
+}
+function save(car) {
+  if (car._id) {
+    return axios.put(BASE_URL + car._id, car).then(res => res.data)
+  } else {
+    return axios.post(BASE_URL, car).then(res => res.data)
   }
-  
-  function getById(bugId) {
-    return axios.get(BASE_URL + bugId).then((res) => res.data)
-  }
-  
-  function remove(bugId) {
-    return axios.get(BASE_URL + bugId + '/remove').then((res) => res.data)
-  }
-  
-  function save(bug) {
-    const url = BASE_URL + 'save'
-    let queryParams = `?title=${bug.title}&severity=${bug.severity}&description=${bug.description}`
-    if (bug._id) queryParams += `&_id=${bug._id}`
-    return axios
-      .get(url + queryParams)
-      .then((res) => res.data)
-      .catch((err) => {
-        console.log('err:', err)
-      })
-  }
-  
-  function getDefaultFilter() {
-    return { txt: '', minSeverity: 0 }
-  }
-  
+}
+function getDefaultFilter() {
+  return { txt: '', minSeverity: 0 }
+}
