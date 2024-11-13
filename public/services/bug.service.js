@@ -1,16 +1,20 @@
+import { sortBy } from "lodash"
+
 export const bugService = {
-  query,
+  query, 
   save,
   remove,
   getById,
   getDefaultFilter,
 }
 
+let pageIdx = 0;
 const BASE_URL = '/api/bug/'
 
-function query(filterBy = { txt: '' }) {
+function query(filterBy = { txt: '', severity: 0, sortBy: { type: 'title', desc: 1 }, pageIdx: 0 }) {
   return axios.get(BASE_URL, { params: filterBy }).then(res => res.data)
 }
+
 function getById(carId) {
   return axios.get(BASE_URL + carId).then(res => res.data)
 }
@@ -25,5 +29,5 @@ function save(car) {
   }
 }
 function getDefaultFilter() {
-  return { txt: '', minSeverity: 0 }
+  return { txt: '', Severity: '', labels: '', pageIdx: 0, sortBy: {type: 'title', desc: 1}}
 }

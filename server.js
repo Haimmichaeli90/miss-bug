@@ -8,46 +8,20 @@ const app = express()
 
 app.use(express.static('public'))
 app.use(cookieParser())
+app.use(express.json())
 
 app.get('/api/bug', (req, res) => {
-    bugService.query()
-        .then(bug => res.send(bug))
-        .catch(err => {
-            loggerService.error('Cannot get bugs', err)
-            res.status(500).send('Cannot get bugs')
-        })
-})
-
-
-app.post('/api/bug', (req, res) => {
-    
-    const createBug = {
-        _id: req.query._id || '',
-        title: req.query.title || '',
-        description: req.query.description || '',
+    const filterBy = {
+        txt: req.query.txt || '',
         severity: +req.query.severity || 0,
+        labels: req.query.labels || ''
     }
+    if (req.query.pageIdx) filterBy.pageIdx = req.query.pageIdx
+    if (req.query.sortBy) filterBy.sortBy = JSON.parse(req.query.sortBy)
 
-    bugService.save(createBug)
-    .then(savedBug => res.send(savedBug))
-    .catch((err => {
-        loggerService.error('Cannot create bug',err)
-        res.status(500).send('Cannot create bug',err)
-    }))
-})   
-
-app.put('/api/bug', (req, res) => {
-    const {bugId} = req.params
-    const updateBug = req.body
-
-    bugService.save(bugId,updateBug)
-    .then(savedBug => res.send(savedBug))
-    .catch((err => {
-        loggerService.error('Cannot update the bug',err)
-        res.status(500).send('Cannot update the  bug',err)
-    }))
-})   
-
+    bugService.query(filterBy)
+        .then(bugs => res.send(bugs))
+})
 
 app.get('/api/bug/:bugId', (req, res) => {
     const { bugId } = req.params
@@ -71,6 +45,31 @@ app.get('/api/bug/:bugId', (req, res) => {
             res.status(500).send('Cannot get bug')
         })
 })
+
+
+app.post('/api/bug', (req, res) => {
+    const bug = req.body
+    bugService.save(bug)
+        .then((addedBug) => {
+            res.send(addedBug)
+        })
+        .catch((err) => {
+            console.log('Had issues adding:', err)
+        })
+})
+
+app.put('/api/bug', (req, res) => {
+    const bug = req.body
+    bugService.save(bug)
+        .then(savedBug => {
+            res.send(savedBug)
+        })
+        .catch((err) => {
+            console.log('Had issues editing:', err)
+        })
+})
+
+
 
 
 app.delete('/api/bug/:bugId', (req, res) => {

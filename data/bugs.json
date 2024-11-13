@@ -3,17 +3,23 @@
         "_id": "8AIyUI",
         "title": "",
         "description": "",
-        "severity": 0,
-        "createdAt": 1731147180600
+        "severity": 7,
+        "createdAt": 1731147180600,
+        "labels": [
+            "critical",
+            "need-CR"
+        ]
     },
     {
         "_id": "xusps3",
         "title": "",
         "description": "",
-        "severity": 0,
+        "severity": 6,
         "createdAt": 1730556205000,
-        "prevId": "HRIso8",
-        "nextId": "EI2UZP"
+        "labels": [
+            "critical",
+            "need-CR"
+        ]
     },
     {
         "_id": "EI2UZP",
@@ -22,8 +28,10 @@
         "severity": 6,
         "createdAt": 1730304171269,
         "updateAt": 1730305029221,
-        "prevId": "xusps3",
-        "nextId": "def456"
+        "labels": [
+            "check",
+            "need-CR"
+        ]
     },
     {
         "_id": "def456",
@@ -31,8 +39,10 @@
         "description": "Page remains blank when opening dashboard",
         "severity": 2,
         "createdAt": 1543108369455,
-        "prevId": "EI2UZP",
-        "nextId": "ghi789"
+        "labels": [
+            "test",
+            "need-CR"
+        ]
     },
     {
         "_id": "ghi789",
@@ -40,8 +50,10 @@
         "description": "Password reset email not being sent",
         "severity": 3,
         "createdAt": 1544109379456,
-        "prevId": "def456",
-        "nextId": "jkl012"
+        "labels": [
+            "critical",
+            "need-CR"
+        ]
     },
     {
         "_id": "jkl012",
@@ -49,25 +61,31 @@
         "description": "App closes unexpectedly after login attempt",
         "severity": 1,
         "createdAt": 1545110389457,
-        "prevId": "ghi789",
-        "nextId": "mno345"
+        "labels": [
+            "critical",
+            "need-CR"
+        ]
     },
     {
         "_id": "mno345",
         "title": "Search function not returning results",
         "description": "No results appear when searching",
-        "severity": 2,
+        "severity": 4,
         "createdAt": 1546111399458,
-        "prevId": "jkl012",
-        "nextId": "pqr678"
+        "labels": [
+            "critical",
+            "need-CR"
+        ]
     },
     {
         "_id": "pqr678",
         "title": "Image upload failing",
         "description": "Error message displayed when trying to upload images",
-        "severity": 3,
+        "severity": 5,
         "createdAt": 1547112409459,
-        "prevId": "mno345",
-        "nextId": "HRIso8"
+        "labels": [
+            "critical",
+            "need-CR"
+        ]
     }
 ]
