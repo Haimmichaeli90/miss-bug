@@ -1,0 +1,45 @@
+.user-msg {
+  position: fixed;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 300px;
+  z-index: 2000;
+  animation: fadeInOut 2.5s;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+}
+
+.user-msg button {
+  background: transparent;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #333;
+}
+
+.user-msg.success {
+  border: 2px solid green;
+  color: green;
+}
+
+.user-msg.error {
+  border: 2px solid red;
+  color: red;
+}

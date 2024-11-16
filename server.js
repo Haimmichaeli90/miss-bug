@@ -1,123 +1,194 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
+import path from 'path'
 import { bugService } from './services/bug.service.js'
-import { loggerService } from './services/logger.service.js'
-import { pdfService } from './services/pdf.service.js'
+import { userService } from './services/user.service.js'
 
 const app = express()
 
+// Config the Express App
 app.use(express.static('public'))
 app.use(cookieParser())
 app.use(express.json())
 
+// List
 app.get('/api/bug', (req, res) => {
-    const filterBy = {
-        txt: req.query.txt || '',
-        severity: +req.query.severity || 0,
-        labels: req.query.labels || ''
-    }
-    if (req.query.pageIdx) filterBy.pageIdx = req.query.pageIdx
-    if (req.query.sortBy) filterBy.sortBy = JSON.parse(req.query.sortBy)
-
-    bugService.query(filterBy)
-        .then(bugs => res.send(bugs))
+  const filterBy = {
+    txt: req.query.txt || '',
+    severity: +req.query.severity || 0,
+    labels: req.query.labels || '',
+    userId: req.query.userId || '',
+  }
+  const sortBy = {
+    type: req.query.type || '',
+    desc: req.query.desc || 1,
+  }
+  if (req.query.pageIdx) filterBy.pageIdx = req.query.pageIdx
+  bugService.query(filterBy, sortBy).then((bugs) => {
+    // console.log('Got Bugs', bugs)
+    res.send(bugs)
+  })
 })
 
+// PDF
+app.get('/api/bug/pdf', (req, res) => {
+  bugService
+    .getPdf()
+    .then((r) => {
+      res.send(r)
+    })
+    .catch((err) => {
+      loggerService.error('Cannot download Buds Pdf', err)
+      res.status(400).send('Cannot download Buds Pdf')
+    })
+})
+
+// Read
 app.get('/api/bug/:bugId', (req, res) => {
-    const { bugId } = req.params
-    let visitedBugs = req.cookies.visitedBugs ? JSON.parse(req.cookies.visitedBugs) : []
-
-    if (!visitedBugs.includes(bugId)) {
-        visitedBugs.push(bugId)
-    }
-
-    if (visitedBugs.length > 3) {
-        return res.status(401).send('Wait for a bit')
-    }
-    console.log('User visited the following bugs:', visitedBugs)
-
-    res.cookie('visitedBugs', JSON.stringify(visitedBugs), { maxAge: 7 * 1000, httpOnly: true })
-
-    bugService.getById(bugId)
-        .then(bug => res.send(bug))
-        .catch(err => {
-            loggerService.error('Cannot get bug', err)
-            res.status(500).send('Cannot get bug')
-        })
+  const { bugId } = req.params
+  let visitedBugIds = req.cookies.visitedBugIds || []
+  if (!visitedBugIds.includes(bugId)) visitedBugIds.push(bugId)
+  if (visitedBugIds.length > 3) return res.status(401).send('Wait for a bit')
+  bugService
+    .getById(bugId)
+    .then((bug) => {
+      res.cookie('visitedBugIds', visitedBugIds, { maxAge: 1000 * 60 * 3 })
+      res.send(bug)
+    })
+    .catch((err) => {
+      console.log('Error:', err)
+      res.status(401).send('Cannot get bug')
+    })
 })
 
-
-app.post('/api/bug', (req, res) => {
-    const bug = req.body
-    bugService.save(bug)
-        .then((addedBug) => {
-            res.send(addedBug)
-        })
-        .catch((err) => {
-            console.log('Had issues adding:', err)
-        })
-})
-
-app.put('/api/bug', (req, res) => {
-    const bug = req.body
-    bugService.save(bug)
-        .then(savedBug => {
-            res.send(savedBug)
-        })
-        .catch((err) => {
-            console.log('Had issues editing:', err)
-        })
-})
-
-
-
-
+// Delete
 app.delete('/api/bug/:bugId', (req, res) => {
-    const {bugId} = req.params
-    bugService.remove(bugId)
-    .then(()=> res.send(bugId + 'Removed Successfully! from server'))
-    .catch(err => {
-        loggerService.error('Cannot remove car',err)
-        res.status(500).send('Cannot remove car')
+  const { loginToken } = req.cookies
+  const loggedinUser = userService.validateToken(loginToken)
+  if (!loggedinUser) return res.status(401).send('Cannot delete bug')
+
+  const { bugId } = req.params
+  bugService
+    .remove(bugId, loggedinUser)
+    .then(() => {
+      res.send(`Bug id : ${bugId} deleted`)
+    })
+    .catch((err) => {
+      console.log('Had issues :', err)
+      res.status(401).send('Cannot remove bug')
     })
 })
 
-app.get('/pdf', (req, res) => {
-    const path = './pdfs/'
-    console.log('in pdf')
-    
-  
-    bugService.query().then(bugs => {
-      bugs.sort((a, b) => b.createdAt - a.createdAt)
-      const rows = bugs.map(({ title, description, severity }) => [title, description, severity])
-      const headers = ['Title', 'Description', 'Severity']
-  
-      const fileName = 'bugs'
-      pdfService.createPdf({ headers, rows, title: 'Bugs report', fileName }).then(() => {
-        res.setHeader('Content-Type', 'application/pdf');
-        res.sendFile(`${process.cwd()}/pdfs/${fileName}.pdf`);
-        
-     }).catch((err)=>{
-  
-        console.error(err);
-        loggerService.error('Cannot download Pdf',err)
-        res.send('We have a problem, try agin soon')
+// Create
+app.post('/api/bug', (req, res) => {
+  const { loginToken } = req.cookies
+  const loggedinUser = userService.validateToken(loginToken)
+  if (!loggedinUser) return res.status(401).send('Cannot add bug')
+
+  const bug = req.body
+  console.log('bug:', bug)
+  delete loggedinUser.username
+  bug.creator = loggedinUser
+
+  bugService.save(bug).then((addedBug) => {
+    res.send(addedBug)
+  })
+})
+
+// Update
+app.put('/api/bug', (req, res) => {
+  const { loginToken } = req.cookies
+  const loggedinUser = userService.validateToken(loginToken)
+  if (!loggedinUser) return res.status(401).send('Cannot update bug')
+
+  const bug = req.body
+  console.log('bug:', bug)
+
+  bugService
+    .save(bug, loggedinUser)
+    .then((savedBug) => {
+      res.send(savedBug)
     })
- })
-  
-
+    .catch((err) => {
+      console.log('Had issues:', err)
+    })
 })
 
-app.get('/api/logs', (req, res) => {
-    const path = process.cwd()
-    res.sendFile(path + '/logs/backend.log')
+// USER
+app.get('/api/user', (req, res) => {
+  userService
+    .query()
+    .then((users) => res.send(users))
+    .catch((err) => res.status(500).send('Cannot get users'))
 })
 
+app.get('/api/user/:userId', (req, res) => {
+  const { userId } = req.params
+
+  userService
+    .getById(userId)
+    .then((user) => res.send(user))
+    .catch((err) => res.status(500).send('Cannot get user'))
+})
+
+app.delete('/api/user/:userId', (req, res) => {
+  const { userId } = req.params
+  bugService
+    .hasBugs(userId)
+    .then(() => {
+      userService
+        .remove(userId)
+        .then(() => res.send('Removed!'))
+        .catch((err) => res.status(401).send(err))
+    })
+    .catch((err) => res.status(401).send('Cannot delete user with bugs'))
+})
+
+// Autherize
+app.post('/api/login', (req, res) => {
+  console.log('req.body', req.body)
+  const credentials = {
+    username: req.body.username,
+    password: req.body.password,
+  }
+  // const credentials = req.body
+  userService
+    .checkLogin(credentials)
+    .then((user) => {
+      if (user) {
+        const loginToken = userService.getLoginToken(user)
+        res.cookie('loginToken', loginToken)
+        res.send(user)
+      } else {
+        res.status(401).send('Invalid credentials')
+      }
+    })
+    .catch((err) => res.status(401).send(err))
+})
+
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('loginToken')
+  res.send('Logged out')
+})
+
+app.post('/api/signup', (req, res) => {
+  const credentials = req.body
+  console.log('credentials', credentials)
+
+  userService.save(credentials).then((user) => {
+    const loginToken = userService.getLoginToken(user)
+    res.cookie('loginToken', loginToken)
+    res.send(user)
+  })
+})
+
+// Fallback route
+app.get('/**', (req, res) => {
+  res.sendFile(path.resolve('public/index.html'))
+})
 
 const port = 3030
-app.get('/', (req, res) => res.send('Hello there'))
-app.listen(port, () => console.log(`Server listening on port http://127.0.0.1:${port}/`))
 
-
-
-
+app.listen(port, () => {
+  console.log(`Server is ready at ${port} http://127.0.0.1:${port}/`)
+})

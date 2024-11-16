@@ -1,0 +1,36 @@
+.bug-filter {
+  width: 300px;
+}
+
+.bug-filter label {
+  font-weight: 600;
+}
+/* Base styling for the filter input */
+.filter-input {
+  width: 100%; /* Full width */
+  padding: 10px; /* Comfortable padding */
+  margin: 8px 0; /* Spacing around the input */
+  display: inline-block; /* Aligns well with other elements */
+  border: 1px solid #ccc; /* Subtle border */
+  border-radius: 4px; /* Slightly rounded corners */
+  box-sizing: border-box; /* Border and padding included in width */
+  font-size: 16px; /* Readable text size */
+  transition: border-color 0.3s; /* Smooth transition for border color */
+}
+
+/* Style for hover state */
+.filter-input:hover {
+  border-color: #888; /* Darker border on hover */
+}
+
+/* Style for focus state (when the input is active) */
+.filter-input:focus {
+  outline: none; /* Removes the default focus outline */
+  border-color: var(--primary-color); /* Primary color border for focus */
+  box-shadow: 0 0 8px 0 rgba(var(--primary-color-rgb), 0.2); /* Subtle shadow with primary color */
+}
+
+/* Placeholder styling */
+.filter-input::placeholder {
+  color: #aaa; /* Lighter text color for placeholder */
+}

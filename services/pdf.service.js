@@ -1,20 +1,28 @@
-import PDFDocument from 'pdfkit-table'
 import fs from 'fs'
+import PDFDocument from 'pdfkit'
+
 export const pdfService = {
-    createPdf
+  buildBugsPDF
 }
 
-function createPdf({ headers, rows, title = 'Table Title', subtitle = 'Some sub title', fileName = 'document' }) {
-    const doc = new PDFDocument({ margin: 30, size: 'A4' })
-    doc.pipe(fs.createWriteStream(`./pdfs/${fileName}.pdf`));
+
+function buildBugsPDF(bugs, filename = 'SaveTheBugs.pdf') {
+  const doc = new PDFDocument()
 
 
-    const table = {
-        title,
-        subtitle,
-        headers,
-        rows
-    }
+  // Pipe its output somewhere, like to a file or HTTP response
+  doc.pipe(fs.createWriteStream(filename))
 
-    return doc.table(table).then(() => { doc.end() }).catch((err) => { })
+  // iterate bugs array, and create a pdf with all the bugs
+  bugs.forEach(bug => {
+    // doc.font('./fonts/roboto.ttf')
+    doc.text(`Bug ID: ${bug._id}`)
+    doc.text(`Title: ${bug.title}`)
+    doc.text(`Description: ${bug.description}`)
+    doc.text(`Severity: ${bug.severity}`)
+    doc.addPage()
+  })
+
+  // finalize PDF file
+  doc.end()
 }

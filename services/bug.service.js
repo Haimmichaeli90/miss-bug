@@ -2,6 +2,7 @@ import fs from 'fs'
 
 const PAGE_SIZE = 5
 import { utilService } from './util.service.js'
+import { pdfService } from './pdf.service.js'
 
 const bugs = utilService.readJsonFile('data/bugs.json')
 
@@ -10,7 +11,8 @@ export const bugService = {
   getById,
   save,
   remove,
-
+  hasBugs,
+  getPdf
 }
 
 // TODO: next and prev bug
@@ -24,7 +26,7 @@ function query(filterBy = { txt: '', severity: 0, sortBy: { type: 'title', desc:
     filteredBugs = filteredBugs.filter((bug) => regExp.test(bug.title))
   }
   if (filterBy.severity) {
-    filteredBugs = filteredBugs.filter((bug) => bug.severity === filterBy.severity)
+    filteredBugs = filteredBugs.filter((bug) => bug.severity > filterBy.severity)
   }
   if (filterBy.labels && filterBy.labels.length) {
     const labelsToFilter = filterBy.labels
@@ -61,37 +63,63 @@ function getById(bugId) {
   return Promise.resolve(bug)
 }
 
-function remove(bugId) {
-  const bugIdx = bugs.findIndex((bug) => bug._id === bugId)
-  bugs.splice(bugIdx, 1)
+function remove(bugId, loggedinUser) {
+  const idx = gBugs.findIndex((bug) => bug._id === bugId)
+  if (idx === -1) return Promise.reject('No bug found')
+
+  if (gBugs[idx].creator._id !== loggedinUser._id && !loggedinUser.isAdmin) {
+    return Promise.reject('Not authorized delete this bug')
+  }
+
+  gBugs.splice(idx, 1)
   return _saveBugsToFile()
 }
 
 // TODO:Updated at key
-function save(bugToSave) {
-  if (bugToSave._id) {
-    const bugIdx = bugs.findIndex((bug) => bug._id === bugToSave._id)
+function save(bug, loggedinUser) {
+  if (bug._id) {
+    const idx = gBugs.findIndex((currBug) => currBug._id === bug._id)
+    if (idx === -1) return Promise.reject('No such bug')
 
-    bugToSave = { ...bugs[bugIdx], ...bugToSave, updateAt: Date.now() }
-    bugs[bugIdx] = bugToSave
-
+    if (gBugs[idx].creator._id !== loggedinUser._id && !loggedinUser.isAdmin) {
+      return Promise.reject('Not authorized update this bug')
+    }
+    gBugs[idx] = bug
   } else {
-    bugToSave._id = utilService.makeId()
+    bug.createdAt = Date.now()
     bug.labels = ['critical', 'need-CR']
-    bugToSave.createdAt = Date.now()
-    bugs.unshift(bugToSave)
+    bug._id = _makeId()
+    bug.description =
+      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel, earum sed corrupti voluptatum voluptatem at.'
+    gBugs.push(bug)
   }
-  return _saveBugsToFile().then(() => bugToSave)
+  return _saveBugsToFile().then(() => bug)
+}
+
+function hasBugs(userId) {
+  const hasBugs = gBugs.some((bug) => bug.creator._id === userId)
+
+  if (hasBugs) return Promise.reject('Cannot remove user with bugs')
+
+  return Promise.resolve()
+}
+
+function getPdf() {
+  pdfService.buildBugsPDF(gBugs) //pdf bonus
+  return Promise.resolve()
 }
 
 function _saveBugsToFile() {
+  console.log('gBugs:', gBugs)
   return new Promise((resolve, reject) => {
-    const data = JSON.stringify(bugs, null, 4)
-    fs.writeFile('data/bugs.json', data, (err) => {
+    fs.writeFile('data/bug.json', JSON.stringify(gBugs, null, 2), (err) => {
       if (err) {
-        return reject(err)
+        console.log(err)
+        reject('Cannot write to file')
+      } else {
+        console.log('Wrote Successfully!')
+        resolve()
       }
-      resolve()
     })
   })
 }

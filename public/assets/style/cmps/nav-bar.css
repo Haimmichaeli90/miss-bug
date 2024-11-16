@@ -1,0 +1,25 @@
+.nav-bar-container {
+  width: 45rem;
+
+  margin-inline-end: 1rem;
+  gap: 3rem;
+  /* padding: 1rem; */
+}
+
+.nav-bar {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-bar a {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.nav-bar a:hover {
+  color: var(--primary-color);
+}

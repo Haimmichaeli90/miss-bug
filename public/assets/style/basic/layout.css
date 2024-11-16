@@ -1,0 +1,18 @@
+.main-layout {
+  /* padding-inline-start: var(--spacing-large);
+  padding-inline-end: var(--spacing-large);
+  margin-top: 3rem; */
+  max-width: 80vw;
+  margin: 1rem auto;
+}
+
+.paging {
+  width: 200px;
+  margin-block-start: 1rem;
+  justify-content: space-between;
+}
+
+.paging span {
+  font-weight: 500;
+  color: var(--primary-color);
+}

@@ -15,9 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "cookie-parser": "^1.4.7",
+    "cryptr": "^6.3.0",
     "express": "^4.21.1",
     "fs": "^0.0.1-security",
     "nodemon": "^3.1.7",
+    "path": "^0.12.7",
     "pdfkit-table": "^0.1.99"
   },
   "description": ""

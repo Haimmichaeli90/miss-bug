@@ -10,6 +10,8 @@ const { Link } = ReactRouterDOM
 
 export function BugIndex() {
     const [bugs, setBugs] = useState(null)
+    const [maxPage, setMaxPage] = useState(null)
+    
     const [filterBy, setFilterBy] = useState({
         txt: '',
         severity: 0,
@@ -18,7 +20,7 @@ export function BugIndex() {
         labels: []
     })
 
-    console.log('bugindex',bugs)
+    console.log('bugindex', bugs)
 
     useEffect(() => {
         loadBugs()
@@ -40,23 +42,15 @@ export function BugIndex() {
     }
 
     function onChangePageIdx(diff) {
-        const bugsPerPage = 5
-        const startIndex = filterBy.pageIdx * bugsPerPage
-        const hasMoreBugs = bugs.length > (startIndex + bugsPerPage)
-    
-        if (bugs.length === 0 && diff > 0) {
-            showErrorMsg('No bugs available to show on the next page')
-            return
-        }
-        setFilterBy(prevFilter => ({
-            ...prevFilter,
-            pageIdx: Math.max(prevFilter.pageIdx + diff, 0)
-        }))
-        if (!hasMoreBugs && diff > 0) {
-            showErrorMsg('No more bugs available')
-        }
+        setFilterBy(prevFilter => {
+            let newPageIdx = prevFilter.pageIdx + diff
+            if (newPageIdx < 0) newPageIdx = 0
+            if (newPageIdx > maxPage) newPageIdx = maxPage + 1
+            if (newPageIdx === maxPage) newPageIdx = maxPage - 1
+            return { ...prevFilter, pageIdx: newPageIdx, }
+        })
     }
-    
+
 
     function onRemoveBug(bugId) {
         bugService
@@ -114,15 +108,15 @@ export function BugIndex() {
             <main className="main-layout">
                 <BugFilter onSetFilter={onSetFilter} filterBy={{ ...filterBy }} />
                 <BugSort onSetSort={onSetSort} sortBy={{ ...filterBy.sortBy }} />
-                <button className="btn">
+                <button className="btn" onClick={onAddBug}>
                     <Link to="/bug/edit">Add Bug ⛐</Link>
                 </button>
-                <BugList bugs={bugs} onRemoveBug={onRemoveBug} />
+                <BugList bugs={bugs} onRemoveBug={onRemoveBug} onEditBug={onEditBug} />
                 <div className="paging flex">
                     <button
                         className="btn"
                         onClick={() => onChangePageIdx(-1)}
-                        disabled={filterBy.pageIdx <= 0}
+                        // disabled={filterBy.pageIdx <= 0}
                     >
                         Previous
                     </button>

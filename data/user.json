@@ -1,0 +1,57 @@
+[
+  {
+    "username": "admin",
+    "password": "admin",
+    "fullname": "Admin Admin",
+    "_id": "fLtg9",
+    "isAdmin": true
+  },
+  {
+    "_id": "u101",
+    "username": "CheckList",
+    "password": "D@2",
+    "fullname": "Ruki The Rock"
+  },
+  {
+    "_id": "u102",
+    "username": "David Games",
+    "password": "A123",
+    "fullname": "David"
+  },
+  {
+    "_id": "oLRch",
+    "fullname": "Oha Net",
+    "password": "1234",
+    "username": "Ohad"
+  },
+  {
+    "_id": "cQMMn",
+    "fullname": "Alma Michaeli",
+    "password": "123",
+    "username": "Alma"
+  },
+  {
+    "_id": "9EqtD",
+    "fullname": "Hadas Michaeli",
+    "password": "1",
+    "username": "Hadas"
+  },
+  {
+    "_id": "Xwkog",
+    "fullname": "Omri Bar",
+    "password": "1234",
+    "username": "Omri"
+  },
+  {
+    "_id": "uiyuWc",
+    "fullname": "haim michaeli",
+    "password": "1234",
+    "username": "haim"
+  },
+  {
+    "_id": "7OfrXR",
+    "fullname": "haim haim",
+    "password": "haim",
+    "username": "haim"
+  }
+]
