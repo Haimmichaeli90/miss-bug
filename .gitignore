@@ -1,0 +1,38 @@
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Local environment variables
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Production
+*.local
+
+# Coverage reports
+coverage/
+
+# Optional npm cache directory
+.npm/
+
+# Parcel cache
+.cache/
+
+# JetBrains IDE settings
+.idea/
